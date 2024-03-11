@@ -1,29 +1,26 @@
-function trial() {
-    const worker = new Worker("./lib/program.js", {
-        type: "module"
-    });
+// TODO:
+// 1. Add labels to the buffer and then the total labels count to the buffer.
+// 2. Create neural network and then train and save it.
+// 3. Allow a user to upload a test and then test the neural network after loading it.
 
-    return new Promise(function promiseHandler(resolve, reject) {
-        worker.onmessage = (e) => {
-            if (e.data.type === "log") {
-                console.log(e.data.data);
-            } else if (e.data.type === "results") {
-                resolve(e.data.data);
-            }
-        }
+import ImagesBuffer from "./lib/ImagesBuffer.js";
+import Server from "./lib/Server.js";
+import NeuralNetwork from "./lib/NeuralNetwork.js";
 
-        worker.onerror = reject
-    });
-}
+const webServer = new Server(80);
+webServer.publicize("./public");
 
-const trialCount = 10;
-for (let i = 0; i < trialCount; i ++) {
-    console.log("Running trial", (i + 1) + "/" + trialCount + "...");
-    const results = await trial();
+webServer.post("/createTest", function processRequest(request, response) {
+    /**
+     * @type {Buffer}
+     */
+    const body = request.body;
+    const imagesBuffer = ImagesBuffer.fromBuffer(body);
 
-    for (let i = 0; i < results.length; i ++) {
-        console.log(`Number ${i} accuracy: ${results[i][0]}/${results[i][1]} (${results[i][0] / results[i][1]})`);
-    }
+    response.send("Received " + imagesBuffer.images.length + " images from " + body.length + " bytes (" + (body.length / 1024 / 1024).toFixed(2) + "mb).");
 
-    console.log("\n\n");
-}
+    const name = "test1";
+    const neuralNetwork = new NeuralNetwork(1024, 256, );
+});
+
+webServer.listen();

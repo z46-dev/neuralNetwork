@@ -1,0 +1,7 @@
+{
+    "name": "neuralnetwork",
+    "version": "0.0.1",
+    "description": "A simple neural network",
+    "main": "index.js",
+    "type": "module"
+}
