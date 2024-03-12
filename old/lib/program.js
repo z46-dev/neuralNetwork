@@ -72,4 +72,7 @@ postMessage({
     data: results
 });
 
-console.log(network.serialize());
+postMessage({
+    type: "save",
+    data: network.serialize()
+});

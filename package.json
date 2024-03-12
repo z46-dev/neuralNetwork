@@ -3,5 +3,8 @@
     "version": "0.0.1",
     "description": "A simple neural network",
     "main": "index.js",
-    "type": "module"
+    "type": "module",
+    "dependencies": {
+        "ws": "^8.16.0"
+    }
 }

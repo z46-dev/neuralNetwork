@@ -9,6 +9,25 @@ export default class NeuralNetwork {
         return y * (1 - y);
     }
 
+    static fromSerialized(serialized) {
+        const data = JSON.parse(serialized);
+        const network = new NeuralNetwork(...data.nodes);
+
+        for (let i = 0; i < data.weights.length; i ++) {
+            network.weights[i].rows = data.weights[i].rows;
+            network.weights[i].columns = data.weights[i].columns;
+            network.weights[i].data = data.weights[i].data;
+        }
+
+        for (let i = 0; i < data.biases.length; i ++) {
+            network.biases[i].rows = data.biases[i].rows;
+            network.biases[i].columns = data.biases[i].columns;
+            network.biases[i].data = data.biases[i].data;
+        }
+
+        return network;
+    }
+
     // Input node counts, array of hidden layer node counts, output node counts
     constructor(...nodes) {
         this.nodes = [nodes[0], ...nodes.slice(1, -1), nodes[nodes.length - 1]];

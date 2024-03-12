@@ -16,7 +16,9 @@ webServer.post("/createTest", function processRequest(request, response) {
      */
     const body = request.body;
     const imagesBuffer = ImagesBuffer.fromBuffer(body);
-    const network = new NeuralNetwork(32 * 32, 256, imagesBuffer.labelsSize);
+
+    const pixelCount = imagesBuffer.size ** 2;
+    const network = new NeuralNetwork(pixelCount, 1024, 128, imagesBuffer.labelsSize);
 
     for (let i = 0; i < imagesBuffer.images.length; i++) {
         const output = new Array(imagesBuffer.labelsSize).fill(0);
@@ -25,7 +27,7 @@ webServer.post("/createTest", function processRequest(request, response) {
         network.train(imagesBuffer.images[i], output);
     }
 
-    saveTest("t1", imagesBuffer.toBuffer(), network.serialize());
+    saveTest("t4", imagesBuffer.toBuffer(), network.serialize());
 
     response.send("Received " + imagesBuffer.images.length + " images from " + body.length + " bytes (" + (body.length / 1024 / 1024).toFixed(2) + "mb).");
 });
@@ -35,7 +37,7 @@ webServer.post("/test", function processRequest(request, response) {
      * @type {Buffer}
      */
     const body = request.body;
-    const loaded = loadTest("t1");
+    const loaded = loadTest("t4");
 
     if (!loaded) {
         response.send("No test found.");

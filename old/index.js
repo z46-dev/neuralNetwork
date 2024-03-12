@@ -15,6 +15,10 @@ function trial() {
                 console.log(e.data.state, (e.data.progress * 100).toFixed(2) + "%");
             }
 
+            if (e.data.type === "save") {
+                test(e.data.data);
+            }
+
             // if (e.data.type === "log") {
             //     console.log(e.data.data);
             // }
@@ -40,3 +44,22 @@ for (let i = 0; i < trialCount; i++) {
 }
 
 console.log(scores, scores.reduce((acc, cur) => acc + cur, 0) / trialCount);
+
+function test(d) {
+    const worker = new Worker("./lib/test.js", {
+        type: "module"
+    });
+
+    return new Promise(function promiseHandler(resolve, reject) {
+        worker.onmessage = (e) => {
+            console.log(e.data);
+
+            // if (e.data.type === "log") {
+            //     console.log(e.data.data);
+            // }
+        }
+
+        worker.onerror = reject;
+        worker.postMessage(d);
+    });
+}

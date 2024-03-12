@@ -1,45 +1,83 @@
 import { generateNumberImage, values } from "./lib/generateData.js";
 
-function createTest() {
+async function notify(message) {
+    if (Notification.permission !== "granted") {
+        await Notification.requestPermission();
+    }
+
+    if (Notification.permission === "granted") {
+        new Notification("Neural Network", {
+            body: message
+        });
+    }
+}
+
+const imageSize = 64;
+
+async function createAndTrain() {
     const images = [];
 
     for (let i = 0; i < values.length; i++) {
-        for (let j = 0; j < 100; j++) {
+        for (let j = 0; j < 500; j++) {
             images.push({
-                image: generateNumberImage(i, 32),
+                image: generateNumberImage(i, imageSize),
                 label: i
             });
         }
     }
 
-    const uint8Array = new Uint8Array(images.length * 32 * 32 + 4 + images.length);
-    uint8Array.set([images.length >> 8, images.length & 0xFF, 32, values.length, ...images.map(i => i.label)], 0);
+    const uint8Array = new Uint8Array(images.length * imageSize * imageSize + 4 + images.length);
+    uint8Array.set([images.length >> 8, images.length & 0xFF, imageSize, values.length], 0);
 
     for (let i = 0; i < images.length; i++) {
-        uint8Array.set(images[i].image, 4 + images.length + i * 32 * 32);
+        uint8Array.set([images[i].label], 4 + i);
+        uint8Array.set(images[i].image, 4 + images.length + i * imageSize * imageSize);
     }
 
-    fetch("/createTest", {
+    const response = await fetch("/createTest", {
         method: "POST",
         body: uint8Array
-    }).then(response => response.text()).then(console.log);
+    });
+
+    const msg = await response.text();
+    notify(`Neural Network trained: ${msg}`);
+
+    return msg;
 }
 
-function makeTest() {
-    const n = Math.random() * values.length | 0;
-    const value = values[n];
+async function testNetwork(n = Math.random() * values.length | 0) {
+    const image = generateNumberImage(n, imageSize);
 
-    console.log("Testing " + value);
-
-    const image = generateNumberImage(n, 32);
-
-    fetch("/test", {
+    const response = await fetch("/test", {
         method: "POST",
         body: new Uint8Array(image)
-    }).then(response => response.text()).then(data => {
-        console.log("Predicted " + data, "Expected " + n);
     });
+
+    const result = await response.text();
+
+    return {
+        valid: result == n,
+        checked: values[n]
+    };
 }
 
-window.createTest = createTest;
-window.makeTest = makeTest;
+async function multipleTests(n = 10) {
+    let score = 0;
+
+    for (let i = 0; i < values.length; i ++) {
+        for (let j = 0; j < n; j ++) {
+            const result = await testNetwork(i);
+
+            if (result.valid) {
+                score ++;
+            }
+        }
+    }
+
+    notify(`Tests done. Accuracy: ${score} / ${values.length * n} (${(score / (values.length * n)).toFixed(2)})`);
+    return +((score / (values.length * n)).toFixed(2));
+}
+
+window.createAndTrain = createAndTrain;
+window.testNetwork = testNetwork;
+window.multipleTests = multipleTests;

@@ -17,7 +17,7 @@ export const fonts = [
     "monospace"
 ];
 
-export const values = "1234567890".split("");//ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
+export const values = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
 
 // Purpose: Generate data for the neural network.
 export function generateNumberImage(number, size = 32, font = fonts[Math.random() * fonts.length | 0]) {
@@ -37,5 +37,5 @@ export function generateNumberImage(number, size = 32, font = fonts[Math.random(
 
     const data = ctx.getImageData(0, 0, size, size).data;
 
-    return Array(data.length / 4).fill(0).map((_, i) => data[i * 4] / 255);
+    return Array(data.length / 4).fill(0).map((_, i) => data[i * 4]);
 }
